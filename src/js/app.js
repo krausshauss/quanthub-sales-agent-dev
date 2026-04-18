@@ -7,9 +7,9 @@
 
 window.App = (() => {
 
-  let _data       = null;  // current HubSpot data
-  let _aiData     = null;  // current AI priorities
-  let _repEmail   = window.CONFIG.CURRENT_REP_EMAIL;
+  let _data       = null;
+  let _aiData     = null;
+  let _repEmail   = new URLSearchParams(window.location.search).get("rep") || window.CONFIG.CURRENT_REP_EMAIL;
   let _refreshTimer = null;
 
   // ── Bootstrap ──────────────────────────────────────────────────────
