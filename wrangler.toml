@@ -1,0 +1,13 @@
+name = "quanthub-sales-agent"
+main = "cloudflare-worker.js"
+compatibility_date = "2024-01-01"
+account_id = "20e7b178f91a4ca92328922dd22abdf2"
+
+[vars]
+ALLOWED_ORIGIN = "https://krausshauss.github.io"
+
+[env.dev]
+name = "quanthub-sales-agent-dev"
+
+[env.dev.vars]
+ALLOWED_ORIGIN = "https://krausshauss.github.io"

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuantHub · Sales Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/css/main.css" />
+</head>
+<body>
+
+  <!-- ── App Shell ───────────────────────────────────────────────── -->
+  <div id="app">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">QH</div>
+        <div>
+          <div class="header-title">Sales Agent</div>
+          <div class="header-sub" id="header-sub">Loading your day...</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="badge badge-live" id="live-badge">● CONNECTING</span>
+        <span class="badge badge-ai">✦ AI AGENT</span>
+        <div class="rep-selector" id="rep-selector" style="display:none">
+          <select id="rep-select" onchange="window.App.switchRep(this.value)">
+            <option value="">Select rep...</option>
+          </select>
+        </div>
+        <button class="btn-refresh" onclick="window.App.refresh()" title="Refresh data">↺</button>
+        <div class="last-refresh" id="last-refresh"></div>
+      </div>
+    </header>
+
+    <!-- KPI Bar -->
+    <div class="kpi-bar">
+      <div class="kpi-card" id="kpi-score">
+        <div class="kpi-ring-wrap">
+          <svg class="kpi-ring" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="26" fill="none" stroke="#1e2027" stroke-width="5"/>
+            <circle id="ring-fill" cx="32" cy="32" r="26" fill="none"
+              stroke="#818cf8" stroke-width="5" stroke-linecap="round"
+              stroke-dasharray="0 163.4" transform="rotate(-90 32 32)"
+              style="transition: stroke-dasharray .8s ease"/>
+          </svg>
+          <div class="ring-center">
+            <span class="ring-val" id="ring-val">—</span>
+            <span class="ring-delta" id="ring-delta"></span>
+          </div>
+        </div>
+        <div class="kpi-info">
+          <div class="kpi-label">AI Priority Score</div>
+          <div class="kpi-detail" id="kpi-score-detail">Calculating...</div>
+        </div>
+      </div>
+      <div class="kpi-card plain">
+        <div class="kpi-label">Open Pipeline</div>
+        <div class="kpi-big" id="kpi-pipeline">—</div>
+        <div class="kpi-sub" id="kpi-pipeline-sub">— deals</div>
+      </div>
+      <div class="kpi-card plain">
+        <div class="kpi-label">Activities Today</div>
+        <div class="kpi-big" id="kpi-activities">—</div>
+        <div class="kpi-sub" id="kpi-activities-sub">of daily target</div>
+      </div>
+      <div class="kpi-card plain">
+        <div class="kpi-label">Deals at Risk</div>
+        <div class="kpi-big risk" id="kpi-risk">—</div>
+        <div class="kpi-sub" id="kpi-risk-sub">no contact 7+ days</div>
+      </div>
+      <div class="kpi-card plain">
+        <div class="kpi-label">Hot Leads</div>
+        <div class="kpi-big hot" id="kpi-leads">—</div>
+        <div class="kpi-sub" id="kpi-leads-sub">new activity</div>
+      </div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="main-grid">
+
+      <!-- LEFT: Priority Feed (SalesLoft style) -->
+      <section class="panel panel-priorities">
+        <div class="panel-header">
+          <span class="panel-title">▸ Today's Priority Actions</span>
+          <span class="panel-hint" id="priority-timestamp"></span>
+        </div>
+        <div id="priority-feed" class="priority-feed">
+          <div class="skeleton-block"></div>
+          <div class="skeleton-block"></div>
+          <div class="skeleton-block"></div>
+          <div class="skeleton-block"></div>
+          <div class="skeleton-block"></div>
+        </div>
+        <!-- AI Insight box -->
+        <div class="insight-box" id="insight-box" style="display:none">
+          <div class="insight-label">✦ Agent Insight</div>
+          <div class="insight-text" id="insight-text"></div>
+        </div>
+        <!-- Ask the agent -->
+        <div class="ask-agent">
+          <input type="text" id="agent-input" placeholder="Ask the agent: 'What should I do after this call?'" />
+          <button onclick="window.App.askAgent()">Ask ↗</button>
+        </div>
+        <div id="agent-response" class="agent-response" style="display:none"></div>
+      </section>
+
+      <!-- RIGHT col -->
+      <div class="right-col">
+
+        <!-- Activity Tracker -->
+        <section class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Activity Tracker · Today</span>
+          </div>
+          <div id="activity-tracker" class="activity-tracker">
+            <div class="skeleton-block" style="height:20px"></div>
+            <div class="skeleton-block" style="height:20px"></div>
+            <div class="skeleton-block" style="height:20px"></div>
+            <div class="skeleton-block" style="height:20px"></div>
+            <div class="skeleton-block" style="height:20px"></div>
+          </div>
+        </section>
+
+        <!-- Deal Velocity -->
+        <section class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Deal Velocity · Pipeline</span>
+          </div>
+          <div id="deal-velocity" class="deal-velocity">
+            <div class="skeleton-block" style="height:20px"></div>
+            <div class="skeleton-block" style="height:20px"></div>
+            <div class="skeleton-block" style="height:20px"></div>
+            <div class="skeleton-block" style="height:20px"></div>
+          </div>
+        </section>
+
+        <!-- Lead Activity Feed -->
+        <section class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Lead Activity · Hot Signals</span>
+            <span class="badge badge-new" id="lead-count-badge" style="display:none"></span>
+          </div>
+          <div id="lead-feed" class="lead-feed">
+            <div class="skeleton-block" style="height:18px"></div>
+            <div class="skeleton-block" style="height:18px"></div>
+            <div class="skeleton-block" style="height:18px"></div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      HubSpot → Cloudflare Worker → Claude AI · Auto-refreshes every 15 min ·
+      <a href="mailto:support@quanthub.com">support</a>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="src/js/config.js"></script>
+  <script src="src/js/hooks/hubspot.js"></script>
+  <script src="src/js/hooks/agent.js"></script>
+  <script src="src/js/components/priorityFeed.js"></script>
+  <script src="src/js/components/activityTracker.js"></script>
+  <script src="src/js/components/dealVelocity.js"></script>
+  <script src="src/js/components/leadFeed.js"></script>
+  <script src="src/js/app.js"></script>
+</body>
+</html>
