@@ -76,14 +76,8 @@ html, body {
 .header-left { display: flex; align-items: center; gap: 12px; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-.logo {
-  width: 36px; height: 36px; border-radius: var(--radius-sm);
-  background: rgba(255,255,255,0.15);
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid rgba(255,255,255,0.25);
-  overflow: hidden;
-}
-.logo img { width: 24px; height: 24px; object-fit: contain; }
+.header-logo { height: 30px; width: auto; display: block; }
+.header-sep  { width: 1px; height: 28px; background: rgba(255,255,255,0.3); }
 
 .header-title { font-size: 16px; font-weight: 700; color: #fff; }
 .header-sub   { font-size: 11px; color: rgba(255,255,255,0.7); }
