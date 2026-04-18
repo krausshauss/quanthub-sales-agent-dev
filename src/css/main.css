@@ -76,7 +76,7 @@ html, body {
 .header-left { display: flex; align-items: center; gap: 12px; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-.header-logo { height: 30px; width: auto; display: block; }
+.header-logo { height: 30px; width: auto; display: block; filter: brightness(0) invert(1); }
 .header-sep  { width: 1px; height: 28px; background: rgba(255,255,255,0.3); }
 
 .header-title { font-size: 16px; font-weight: 700; color: #fff; }
