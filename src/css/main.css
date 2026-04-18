@@ -74,7 +74,7 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
-  height: 68px;
+  height: 76px;
   border-bottom: 3px solid #0077B5;
   background: #fff;
   box-shadow: 0 2px 8px rgba(0,119,181,.10);
@@ -88,7 +88,7 @@ html, body {
 .header-left { display: flex; align-items: center; gap: 14px; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-.header-logo { height: 38px; width: auto; display: block; }
+.header-logo { height: 52px; width: auto; display: block; }
 .header-sep  { width: 1px; height: 36px; background: #DDE4EF; }
 
 .header-title { font-size: 15px; font-weight: 700; color: #0077B5; letter-spacing: -.01em; }
@@ -171,12 +171,49 @@ html, body {
 
 .panel-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border);
-  position: sticky; top: 80px; background: var(--bg-panel); z-index: 10;
+  position: sticky; top: 76px; background: var(--bg-panel); z-index: 10;
 }
 .panel-title { font-size: 10px; font-weight: 700; color: var(--text-hint); text-transform: uppercase; letter-spacing: .08em; }
 .panel-hint  { font-size: 10px; color: var(--text-hint); font-family: var(--font-mono); }
+
+/* ── Per-section color accents ────────────────────────────────────── */
+.panel-priorities {
+  border-top: 3px solid #0077B5;
+}
+.panel-priorities .panel-header {
+  background: #EBF5FC;
+  border-bottom: 1px solid #C7DFF0;
+}
+.panel-priorities .panel-title { color: #0077B5; }
+
+.panel-activity {
+  border-top: 3px solid #22C55E;
+}
+.panel-activity .panel-header {
+  background: #F0FDF4;
+  border-bottom: 1px solid #BBF7D0;
+}
+.panel-activity .panel-title { color: #15803D; }
+
+.panel-velocity {
+  border-top: 3px solid #F59E0B;
+}
+.panel-velocity .panel-header {
+  background: #FFFBEB;
+  border-bottom: 1px solid #FDE68A;
+}
+.panel-velocity .panel-title { color: #B45309; }
+
+.panel-leads {
+  border-top: 3px solid #FB7185;
+}
+.panel-leads .panel-header {
+  background: #FFF1F2;
+  border-bottom: 1px solid #FECDD3;
+}
+.panel-leads .panel-title { color: #E11D48; }
 
 .right-col { display: flex; flex-direction: column; gap: 1px; background: var(--border); }
 
