@@ -88,7 +88,8 @@ html, body {
 .header-left { display: flex; align-items: center; gap: 14px; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-.header-logo { height: 48px; width: auto; display: block; filter: brightness(0) invert(1); }
+.header-logo-pill { background: #fff; border-radius: 8px; padding: 5px 12px; display: flex; align-items: center; }
+.header-logo { height: 38px; width: auto; display: block; }
 .header-sep  { width: 1px; height: 36px; background: rgba(255,255,255,.35); }
 
 .header-title { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -.01em; }
