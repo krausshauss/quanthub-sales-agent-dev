@@ -13,10 +13,14 @@
   --text-sec:     #7b8099;
   --text-hint:    #404560;
 
-  --purple:       #818cf8;
-  --purple-dim:   #1e2035;
-  --green:        #22c97a;
-  --green-dim:    #0d2d1e;
+  /* QuantHub Brand Colors */
+  --brand:        #0077B5;
+  --brand-dim:    #071929;
+  --brand-sec:    #0B4971;
+  --accent:       #69A62A;
+  --accent-dim:   #162309;
+
+  /* Status colors */
   --amber:        #f5a623;
   --amber-dim:    #2d2206;
   --red:          #f87171;
@@ -60,8 +64,8 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: 14px 24px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-panel);
+  border-bottom: 1px solid var(--brand-sec);
+  background: linear-gradient(90deg, #0077B5, #0B4971);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -74,38 +78,40 @@ html, body {
 
 .logo {
   width: 36px; height: 36px; border-radius: var(--radius-sm);
-  background: var(--purple-dim); color: var(--purple);
-  font-size: 13px; font-weight: 800; display: flex;
-  align-items: center; justify-content: center;
-  border: 1px solid #2a2d52;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,0.25);
+  overflow: hidden;
 }
-.header-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
-.header-sub   { font-size: 11px; color: var(--text-sec); }
+.logo img { width: 24px; height: 24px; object-fit: contain; }
+
+.header-title { font-size: 16px; font-weight: 700; color: #fff; }
+.header-sub   { font-size: 11px; color: rgba(255,255,255,0.7); }
 
 .badge {
   font-size: 9px; font-weight: 700; padding: 3px 9px;
   border-radius: 20px; letter-spacing: .06em;
   white-space: nowrap;
 }
-.badge-live { background: var(--green-dim); color: var(--green); }
+.badge-live { background: var(--accent-dim); color: var(--accent); border: 1px solid #2a4010; }
 .badge-live.connecting { background: var(--amber-dim); color: var(--amber); }
-.badge-ai   { background: var(--purple-dim); color: var(--purple); }
-.badge-new  { background: var(--coral-dim);  color: var(--coral); }
+.badge-ai   { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+.badge-new  { background: var(--coral-dim); color: var(--coral); }
 
 .rep-selector select {
-  background: var(--bg-card); color: var(--text-primary);
-  border: 1px solid var(--border-hi); border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.15); color: #fff;
+  border: 1px solid rgba(255,255,255,0.3); border-radius: var(--radius-sm);
   padding: 5px 10px; font-family: var(--font-ui); font-size: 12px;
   cursor: pointer;
 }
 .btn-refresh {
-  background: transparent; border: 1px solid var(--border-hi);
-  color: var(--text-sec); border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; border-radius: var(--radius-sm);
   padding: 5px 10px; cursor: pointer; font-size: 14px;
   transition: all .15s;
 }
-.btn-refresh:hover { color: var(--text-primary); border-color: var(--purple); }
-.last-refresh { font-size: 10px; color: var(--text-hint); font-family: var(--font-mono); }
+.btn-refresh:hover { background: rgba(255,255,255,0.25); }
+.last-refresh { font-size: 10px; color: rgba(255,255,255,0.6); font-family: var(--font-mono); }
 
 /* ── KPI Bar ──────────────────────────────────────────────────────── */
 .kpi-bar {
@@ -207,8 +213,8 @@ html, body {
 .tag-hot      { background: var(--red-dim);    color: var(--red); }
 .tag-followup { background: var(--amber-dim);  color: var(--amber); }
 .tag-atrisk   { background: var(--coral-dim);  color: var(--coral); }
-.tag-newopp   { background: var(--green-dim);  color: var(--green); }
-.tag-admin    { background: var(--purple-dim); color: var(--purple); }
+.tag-newopp   { background: var(--accent-dim); color: var(--accent); }
+.tag-admin    { background: var(--brand-dim);  color: var(--brand); }
 .tag-lead     { background: var(--blue-dim);   color: var(--blue); }
 .tag-sequence { background: #1a2035; color: #7dd3fc; }
 
@@ -222,13 +228,13 @@ html, body {
 /* ── Insight box ──────────────────────────────────────────────────── */
 .insight-box {
   margin: 0 20px 16px;
-  background: var(--blue-dim);
-  border: 1px solid #1a3050;
+  background: var(--brand-dim);
+  border: 1px solid #0a2a40;
   border-radius: var(--radius-md);
   padding: 12px 16px;
 }
-.insight-label { font-size: 9px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
-.insight-text  { font-size: 12px; color: #93c5fd; line-height: 1.65; }
+.insight-label { font-size: 9px; font-weight: 700; color: var(--brand); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+.insight-text  { font-size: 12px; color: #7dc8f0; line-height: 1.65; }
 
 /* ── Ask the Agent ────────────────────────────────────────────────── */
 .ask-agent {
@@ -242,21 +248,21 @@ html, body {
   padding: 8px 12px; outline: none;
   transition: border-color .15s;
 }
-.ask-agent input:focus { border-color: var(--purple); }
+.ask-agent input:focus { border-color: var(--brand); }
 .ask-agent button {
-  background: var(--purple-dim); border: 1px solid #3a3d72;
-  color: var(--purple); border-radius: var(--radius-sm);
+  background: var(--brand); border: 1px solid var(--brand-sec);
+  color: #fff; border-radius: var(--radius-sm);
   padding: 8px 14px; cursor: pointer; font-family: var(--font-ui);
   font-size: 12px; font-weight: 600; white-space: nowrap;
   transition: all .15s;
 }
-.ask-agent button:hover { background: #252860; }
+.ask-agent button:hover { background: var(--brand-sec); }
 
 .agent-response {
   margin: 0 20px 16px;
-  background: var(--purple-dim); border: 1px solid #2a2d52;
+  background: var(--brand-dim); border: 1px solid #0a2a40;
   border-radius: var(--radius-md); padding: 12px 16px;
-  font-size: 12px; color: #c7d2fe; line-height: 1.65;
+  font-size: 12px; color: #7dc8f0; line-height: 1.65;
 }
 
 /* ── Activity Tracker ─────────────────────────────────────────────── */
@@ -332,7 +338,7 @@ html, body {
   font-size: 10px; color: var(--text-hint);
   background: var(--bg-panel);
 }
-.footer a { color: var(--purple); text-decoration: none; }
+.footer a { color: var(--brand); text-decoration: none; }
 
 /* ── Animations ───────────────────────────────────────────────────── */
 @keyframes fadeUp {
