@@ -17,8 +17,8 @@
   --brand:        #0077B5;
   --brand-dim:    #071929;
   --brand-sec:    #0B4971;
-  --accent:       #69A62A;
-  --accent-dim:   #162309;
+  --accent:       #22C55E;
+  --accent-dim:   #052e16;
 
   /* Status colors */
   --amber:        #f5a623;
@@ -30,7 +30,7 @@
   --coral:        #fb923c;
   --coral-dim:    #2d1a0a;
 
-  --font-ui:   'Syne', sans-serif;
+  --font-ui:   'Manrope', sans-serif;
   --font-mono: 'DM Mono', monospace;
 
   --radius-sm: 6px;
