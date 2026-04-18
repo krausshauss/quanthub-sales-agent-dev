@@ -74,10 +74,10 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
-  height: 80px;
-  border-bottom: 1px solid var(--brand-sec);
-  background: linear-gradient(90deg, #0077B5, #0B4971);
-  box-shadow: 0 2px 10px rgba(0,119,181,.25);
+  height: 68px;
+  border-bottom: 3px solid #0077B5;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,119,181,.10);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -88,33 +88,32 @@ html, body {
 .header-left { display: flex; align-items: center; gap: 14px; }
 .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-.header-logo-pill { background: #fff; border-radius: 8px; padding: 5px 12px; display: flex; align-items: center; }
 .header-logo { height: 38px; width: auto; display: block; }
-.header-sep  { width: 1px; height: 36px; background: rgba(255,255,255,.35); }
+.header-sep  { width: 1px; height: 36px; background: #DDE4EF; }
 
-.header-title { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -.01em; }
-.header-sub   { font-size: 11px; color: rgba(255,255,255,.7); }
+.header-title { font-size: 15px; font-weight: 700; color: #0077B5; letter-spacing: -.01em; }
+.header-sub   { font-size: 11px; color: #4A5568; }
 
 .badge {
   font-size: 9px; font-weight: 700; padding: 3px 9px;
   border-radius: 20px; letter-spacing: .06em; white-space: nowrap;
 }
-.badge-live { background: rgba(34,197,94,.2); color: #fff; border: 1px solid rgba(34,197,94,.4); }
-.badge-live.connecting { background: rgba(245,158,35,.2); color: #fff; border: 1px solid rgba(245,158,35,.4); }
-.badge-ai   { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.3); }
+.badge-live { background: #dcfce7; color: #16a34a; border: 1px solid #86efac; }
+.badge-live.connecting { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+.badge-ai   { background: #E0F0FA; color: #0077B5; border: 1px solid #7ABDE0; }
 
 .rep-selector select {
-  background: rgba(255,255,255,.15); color: #fff;
-  border: 1px solid rgba(255,255,255,.3); border-radius: var(--radius-sm);
+  background: #F4F6F9; color: #3A3C3E;
+  border: 1px solid #DDE4EF; border-radius: var(--radius-sm);
   padding: 4px 10px; font-family: var(--font-ui); font-size: 12px; cursor: pointer;
 }
 .btn-refresh {
-  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
-  color: #fff; border-radius: var(--radius-sm);
+  background: #F4F6F9; border: 1px solid #DDE4EF;
+  color: #0077B5; border-radius: var(--radius-sm);
   padding: 4px 10px; cursor: pointer; font-size: 14px; transition: all .15s;
 }
-.btn-refresh:hover { background: rgba(255,255,255,.25); }
-.last-refresh { font-size: 10px; color: rgba(255,255,255,.65); font-family: var(--font-mono); }
+.btn-refresh:hover { background: #E0F0FA; }
+.last-refresh { font-size: 10px; color: #7A8FA6; font-family: var(--font-mono); }
 
 /* ── KPI Bar ──────────────────────────────────────────────────────── */
 .kpi-bar {
