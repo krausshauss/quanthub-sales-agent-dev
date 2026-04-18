@@ -9,6 +9,22 @@ window.HubSpot = (() => {
 
   const BASE = () => window.CONFIG.WORKER_URL;
 
+  // Stage label cache — populated on first loadAll(), merged with CONFIG.STAGE_LABELS
+  let _stageLabels = {};
+
+  async function fetchStageLabels() {
+    try {
+      const data = await api("/hubspot/stages");
+      _stageLabels = { ...data, ...window.CONFIG.STAGE_LABELS }; // config overrides take precedence
+    } catch {
+      _stageLabels = { ...window.CONFIG.STAGE_LABELS };
+    }
+  }
+
+  function stageLabel(stageId) {
+    return _stageLabels[stageId] || window.CONFIG.STAGE_LABELS[stageId] || (stageId || "Unknown").replace(/_/g, " ");
+  }
+
   // ── Core fetch wrapper ─────────────────────────────────────────────
   async function api(path, options = {}) {
     const res = await fetch(`${BASE()}${path}`, {
@@ -45,14 +61,14 @@ window.HubSpot = (() => {
     const raw = await api(`/hubspot/deals?owner=${encodeURIComponent(ownerEmail)}&status=open`);
     const deals = (raw.results || []).map(d => {
       const p = d.properties || {};
-      const stageLabel = window.CONFIG.STAGE_LABELS[p.dealstage] || p.dealstage?.replace(/_/g, " ") || "Unknown";
+      const stageLbl = stageLabel(p.dealstage);
       return {
         id:             d.id,
         name:           p.dealname || "Unnamed Deal",
         amount:         parseFloat(p.amount) || 0,
         amountFmt:      fmtMoney(p.amount),
         stage:          p.dealstage || "",
-        stageLabel,
+        stageLabel:     stageLbl,
         closeDate:      p.closedate || null,
         daysToClose:    p.closedate ? daysSince(new Date(p.closedate)) * -1 : null,
         lastContact:    p.notes_last_updated || p.hs_lastmodifieddate || null,
@@ -141,6 +157,7 @@ window.HubSpot = (() => {
 
   // ── Bulk load for one rep ──────────────────────────────────────────
   async function loadAll(ownerEmail) {
+    await fetchStageLabels();
     const [deals, contacts, leads, activities, sequences] = await Promise.allSettled([
       fetchDeals(ownerEmail),
       fetchContacts(ownerEmail),

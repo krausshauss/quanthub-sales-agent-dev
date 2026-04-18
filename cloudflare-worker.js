@@ -198,6 +198,19 @@ export default {
         }
       }
 
+      // ── GET /hubspot/stages ──────────────────────────────────────
+      // Returns { stageId: "Stage Label", ... } for all deal pipelines
+      if (path === "/hubspot/stages" && request.method === "GET") {
+        const data = await hsGet(env, "/crm/v3/pipelines/deals");
+        const stageMap = {};
+        for (const pipeline of (data.results || [])) {
+          for (const stage of (pipeline.stages || [])) {
+            stageMap[stage.id] = stage.label;
+          }
+        }
+        return json(stageMap, 200, corsHeaders);
+      }
+
       // ── GET /hubspot/owners ──────────────────────────────────────
       if (path === "/hubspot/owners" && request.method === "GET") {
         const data = await hsGet(env, "/crm/v3/owners/?limit=100");
