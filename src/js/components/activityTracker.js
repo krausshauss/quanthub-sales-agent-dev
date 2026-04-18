@@ -118,6 +118,9 @@ window.DealVelocity = (() => {
  */
 window.LeadFeed = (() => {
 
+  let _leads = [];
+  let _expandedIndex = null;
+
   const SIGNAL_COLORS = {
     hot:    "#f87171",
     warm:   "#fbbf24",
@@ -125,7 +128,6 @@ window.LeadFeed = (() => {
   };
 
   function signalLevel(hoursAgo) {
-    if (hoursAgo <= 4)  return "hot";
     if (hoursAgo <= 24) return "hot";
     if (hoursAgo <= 48) return "warm";
     return "cold";
@@ -137,15 +139,22 @@ window.LeadFeed = (() => {
     return `${Math.floor(hoursAgo / 24)}d ago`;
   }
 
+  function urgencyLabel(hoursAgo) {
+    if (hoursAgo <= 4)  return { label: "⚡ Act now", color: "#f87171" };
+    if (hoursAgo <= 24) return { label: "🔥 Hot signal", color: "#fb923c" };
+    if (hoursAgo <= 48) return { label: "⚠ Follow up", color: "#fbbf24" };
+    return { label: "Cool", color: "#4b5563" };
+  }
+
   function render(leads) {
     const el = document.getElementById("lead-feed");
     const badge = document.getElementById("lead-count-badge");
     if (!el) return;
 
-    // Sort by most recent activity first
-    const sorted = [...(leads || [])].sort((a, b) => a.hoursAgo - b.hoursAgo);
-    const hot = sorted.filter(l => l.isHot);
+    _leads = [...(leads || [])].sort((a, b) => a.hoursAgo - b.hoursAgo);
+    _expandedIndex = null;
 
+    const hot = _leads.filter(l => l.isHot);
     if (badge) {
       if (hot.length > 0) {
         badge.textContent = `${hot.length} HOT`;
@@ -155,28 +164,92 @@ window.LeadFeed = (() => {
       }
     }
 
-    if (!sorted.length) {
+    if (!_leads.length) {
       el.innerHTML = `<div style="color:#4b5563;font-size:12px;padding:10px 20px">No lead activity signals.</div>`;
       return;
     }
 
-    el.innerHTML = sorted.slice(0, 8).map(l => {
-      const sig = signalLevel(l.hoursAgo);
-      const dotColor = SIGNAL_COLORS[sig];
-      const eventText = l.stage
-        ? `${l.stage.replace(/_/g, " ")}${l.company ? ` · ${l.company}` : ""}`
-        : l.company || "Activity detected";
+    el.innerHTML = _leads.slice(0, 8).map((l, i) => buildLeadHtml(l, i)).join("");
+  }
 
-      return `
-        <div class="lead-item">
-          <div class="lead-dot" style="background:${dotColor}"></div>
-          <div class="lead-body">
-            <div class="lead-name">${escHtml(l.name)}</div>
-            <div class="lead-event">${escHtml(eventText)}</div>
-          </div>
+  function buildLeadHtml(l, i) {
+    const sig = signalLevel(l.hoursAgo);
+    const dotColor = SIGNAL_COLORS[sig];
+    const eventText = l.stage
+      ? `${l.stage.replace(/_/g, " ")}${l.company ? ` · ${l.company}` : ""}`
+      : l.company || "Activity detected";
+
+    return `
+      <div class="lead-item lead-item-clickable" id="lead-item-${i}" onclick="LeadFeed.toggleExpand(${i})">
+        <div class="lead-dot" style="background:${dotColor}"></div>
+        <div class="lead-body">
+          <div class="lead-name">${escHtml(l.name)}</div>
+          <div class="lead-event">${escHtml(eventText)}</div>
+        </div>
+        <div class="lead-right">
           <div class="lead-time">${relTime(l.hoursAgo)}</div>
-        </div>`;
-    }).join("");
+          <div class="lead-chevron">›</div>
+        </div>
+      </div>
+      <div class="lead-detail-panel" id="lead-detail-${i}" style="display:none">
+        ${buildDetailHtml(l)}
+      </div>`;
+  }
+
+  function buildDetailHtml(l) {
+    const urgency = urgencyLabel(l.hoursAgo);
+    const source  = l.source ? escHtml(l.source) : "HubSpot CRM";
+    const stage   = l.stage  ? escHtml(l.stage.replace(/_/g, " ")) : "—";
+    const company = l.company ? escHtml(l.company) : "—";
+    const email   = l.email   ? `<a href="mailto:${escHtml(l.email)}" style="color:#60a5fa">${escHtml(l.email)}</a>` : "—";
+    const question = `Tell me about ${l.name}${l.company ? ` at ${l.company}` : ""} and what I should say when I reach out.`;
+
+    return `
+      <div class="ld-row"><span class="ld-key">Status</span><span class="ld-val" style="color:${urgency.color}">${urgency.label}</span></div>
+      <div class="ld-row"><span class="ld-key">Company</span><span class="ld-val">${company}</span></div>
+      <div class="ld-row"><span class="ld-key">Stage</span><span class="ld-val">${stage}</span></div>
+      <div class="ld-row"><span class="ld-key">Source</span><span class="ld-val">${source}</span></div>
+      <div class="ld-row"><span class="ld-key">Email</span><span class="ld-val">${email}</span></div>
+      <div class="ld-row"><span class="ld-key">Last activity</span><span class="ld-val">${relTime(l.hoursAgo)}</span></div>
+      <div class="ld-actions">
+        <button class="ld-btn" onclick="event.stopPropagation();LeadFeed.askAboutLead('${escHtml(question).replace(/'/g,"\\'")}')">✦ Ask Agent</button>
+        ${l.email ? `<a class="ld-btn ld-btn-email" href="mailto:${escHtml(l.email)}" onclick="event.stopPropagation()">✉ Email</a>` : ""}
+      </div>`;
+  }
+
+  function toggleExpand(index) {
+    const panel = document.getElementById(`lead-detail-${index}`);
+    const item  = document.getElementById(`lead-item-${index}`);
+    if (!panel) return;
+
+    const isOpen = panel.style.display !== "none";
+
+    // Close previously expanded
+    if (_expandedIndex !== null && _expandedIndex !== index) {
+      const prev = document.getElementById(`lead-detail-${_expandedIndex}`);
+      const prevItem = document.getElementById(`lead-item-${_expandedIndex}`);
+      if (prev) prev.style.display = "none";
+      if (prevItem) prevItem.classList.remove("lead-item-active");
+    }
+
+    if (isOpen) {
+      panel.style.display = "none";
+      if (item) item.classList.remove("lead-item-active");
+      _expandedIndex = null;
+    } else {
+      panel.style.display = "block";
+      if (item) item.classList.add("lead-item-active");
+      _expandedIndex = index;
+    }
+  }
+
+  function askAboutLead(question) {
+    const input = document.getElementById("agent-input");
+    if (input) {
+      input.value = question;
+      input.focus();
+      input.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
   }
 
   function renderLoading() {
@@ -191,5 +264,5 @@ window.LeadFeed = (() => {
       .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
 
-  return { render, renderLoading };
+  return { render, renderLoading, toggleExpand, askAboutLead };
 })();

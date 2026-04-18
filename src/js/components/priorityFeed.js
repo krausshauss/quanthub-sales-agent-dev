@@ -7,6 +7,8 @@
 
 window.PriorityFeed = (() => {
 
+  let _priorities = [];
+
   const TAG_CLASS = {
     "Hot":      "tag-hot",
     "Follow-up":"tag-followup",
@@ -36,21 +38,25 @@ window.PriorityFeed = (() => {
     const feed = document.getElementById("priority-feed");
     if (!feed) return;
 
-    if (!priorities || !priorities.length) {
+    _priorities = priorities || [];
+
+    if (!_priorities.length) {
       feed.innerHTML = `<div class="error-bar">No priorities generated. Check your Claude API connection.</div>`;
       return;
     }
 
-    feed.innerHTML = priorities.map((p, i) => {
+    feed.innerHTML = _priorities.map((p, i) => {
       const style = RANK_STYLES[i] || RANK_STYLES[4];
       const tagClass = TAG_CLASS[p.tag] || "tag-admin";
 
       return `
-        <div class="priority-item fade-up" style="animation-delay:${i * 60}ms"
-             onclick="PriorityFeed.onItemClick(${i})"
-             data-rank="${p.rank}">
+        <div class="priority-item fade-up" style="animation-delay:${i * 60}ms" data-rank="${p.rank}" id="pri-item-${i}">
+          <label class="pri-check-wrap" onclick="event.stopPropagation()" title="Mark complete">
+            <input type="checkbox" class="pri-checkbox" onchange="PriorityFeed.onCheckboxChange(${i}, this.checked)" />
+            <span class="pri-checkmark"></span>
+          </label>
           <div class="pri-rank" style="background:${style.bg};color:${style.color}">${p.rank}</div>
-          <div class="pri-body">
+          <div class="pri-body" onclick="PriorityFeed.onItemClick(${i})" style="cursor:pointer;flex:1">
             <div class="pri-title">${escHtml(p.title)}</div>
             <div class="pri-detail">${escHtml(p.detail)}</div>
             <div class="pri-meta">
@@ -101,13 +107,39 @@ window.PriorityFeed = (() => {
   }
 
   function onItemClick(index) {
-    // Pre-fill the ask-agent input with context about this priority
     const input = document.getElementById("agent-input");
     if (input) {
-      const item = document.querySelectorAll(".priority-item")[index];
-      const title = item?.querySelector(".pri-title")?.textContent || "";
+      const p = _priorities[index];
+      const title = p?.title || "";
       input.value = `What's the best approach for: "${title}"?`;
       input.focus();
+    }
+  }
+
+  async function onCheckboxChange(index, checked) {
+    const item = document.getElementById(`pri-item-${index}`);
+    if (!item) return;
+
+    if (checked) {
+      item.classList.add("pri-done");
+      const p = _priorities[index];
+      try {
+        const repEmail = new URLSearchParams(window.location.search).get("rep")
+          || (window.CONFIG && window.CONFIG.CURRENT_REP_EMAIL) || "";
+        await fetch(`${window.CONFIG.WORKER_URL}/hubspot/activity`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title:      p.title,
+            detail:     p.detail,
+            ownerEmail: repEmail,
+          }),
+        });
+      } catch (e) {
+        console.warn("[PriorityFeed] Activity log failed:", e.message);
+      }
+    } else {
+      item.classList.remove("pri-done");
     }
   }
 
@@ -119,6 +151,6 @@ window.PriorityFeed = (() => {
       .replace(/"/g, "&quot;");
   }
 
-  return { render, renderLoading, renderInsight, renderAgentResponse, onItemClick };
+  return { render, renderLoading, renderInsight, renderAgentResponse, onItemClick, onCheckboxChange };
 
 })();

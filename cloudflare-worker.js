@@ -217,6 +217,26 @@ export default {
         return json(data, 200, corsHeaders);
       }
 
+      // ── POST /hubspot/activity ───────────────────────────────────
+      // Log a completed task (priority action checked off by rep)
+      if (path === "/hubspot/activity" && request.method === "POST") {
+        const body  = await request.json();
+        const { title, detail, ownerEmail } = body;
+        const ownerId = await resolveOwnerId(env, ownerEmail);
+
+        const taskProps = {
+          hs_task_subject: title || "Priority action completed",
+          hs_task_body:    detail || "",
+          hs_task_status:  "COMPLETED",
+          hs_task_type:    "TODO",
+          hs_timestamp:    new Date().toISOString(),
+        };
+        if (ownerId) taskProps.hubspot_owner_id = ownerId;
+
+        const task = await hsPost(env, "/crm/v3/objects/tasks", { properties: taskProps });
+        return json({ ok: true, id: task.id }, 200, corsHeaders);
+      }
+
       // ── POST /slack/digest ───────────────────────────────────────
       if (path === "/slack/digest" && request.method === "POST") {
         if (!env.SLACK_WEBHOOK_URL) {
