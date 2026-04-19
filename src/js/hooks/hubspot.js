@@ -58,25 +58,33 @@ window.HubSpot = (() => {
 
   // ── Deals ──────────────────────────────────────────────────────────
   async function fetchDeals(ownerEmail) {
-    const raw = await api(`/hubspot/deals?owner=${encodeURIComponent(ownerEmail)}&status=open`);
-    const deals = (raw.results || []).map(d => {
-      const p = d.properties || {};
-      const stageLbl = stageLabel(p.dealstage);
-      return {
-        id:             d.id,
-        name:           p.dealname || "Unnamed Deal",
-        amount:         parseFloat(p.amount) || 0,
-        amountFmt:      fmtMoney(p.amount),
-        stage:          p.dealstage || "",
-        stageLabel:     stageLbl,
-        closeDate:      p.closedate || null,
-        daysToClose:    p.closedate ? daysSince(new Date(p.closedate)) * -1 : null,
-        lastContact:    p.notes_last_updated || p.hs_lastmodifieddate || null,
-        daysSinceContact: daysSince(p.notes_last_updated || p.hs_lastmodifieddate),
-        probability:    parseFloat(p.hs_deal_stage_probability) || 0,
-        isAtRisk:       daysSince(p.notes_last_updated || p.hs_lastmodifieddate) >= window.CONFIG.RISK_DAYS_NO_CONTACT,
-      };
-    });
+    const raw = await api(`/hubspot/deals?owner=${encodeURIComponent(ownerEmail)}`);
+    const CLOSED_TERMS = ["closed", "won", "lost"];
+    const isClosedStage = (lbl) => CLOSED_TERMS.some(t => lbl.toLowerCase().includes(t));
+
+    const deals = (raw.results || [])
+      .map(d => {
+        const p = d.properties || {};
+        const stageLbl = stageLabel(p.dealstage);
+        return {
+          id:               d.id,
+          name:             p.dealname || "Unnamed Deal",
+          amount:           parseFloat(p.amount) || 0,
+          amountFmt:        fmtMoney(p.amount),
+          stage:            p.dealstage || "",
+          stageLabel:       stageLbl,
+          pipeline:         p.pipeline || "",
+          closeDate:        p.closedate || null,
+          daysToClose:      p.closedate ? Math.ceil((new Date(p.closedate) - Date.now()) / 86_400_000) : null,
+          lastContact:      p.notes_last_updated || p.hs_lastmodifieddate || null,
+          daysSinceContact: daysSince(p.notes_last_updated || p.hs_lastmodifieddate),
+          probability:      parseFloat(p.hs_deal_stage_probability) || 0,
+          isAtRisk:         daysSince(p.notes_last_updated || p.hs_lastmodifieddate) >= window.CONFIG.RISK_DAYS_NO_CONTACT,
+          isClosed:         p.hs_is_closed === "true" || isClosedStage(stageLbl),
+        };
+      })
+      .filter(d => !d.isClosed);
+
     return deals;
   }
 
@@ -157,7 +165,7 @@ window.HubSpot = (() => {
 
   // ── Bulk load for one rep ──────────────────────────────────────────
   async function loadAll(ownerEmail) {
-    await fetchStageLabels();
+    await fetchStageLabels(); // must complete before fetchDeals uses stageLabel()
     const [deals, contacts, leads, activities, sequences] = await Promise.allSettled([
       fetchDeals(ownerEmail),
       fetchContacts(ownerEmail),

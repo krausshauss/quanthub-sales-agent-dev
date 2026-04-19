@@ -57,20 +57,19 @@ export default {
 
       // ── GET /hubspot/deals ───────────────────────────────────────
       if (path === "/hubspot/deals" && request.method === "GET") {
-        const owner  = url.searchParams.get("owner") || "";
-        const status = url.searchParams.get("status") || "open";
+        const owner   = url.searchParams.get("owner") || "";
         const ownerId = await resolveOwnerId(env, owner);
 
-        const filters = [];
-        if (ownerId) filters.push({ propertyName: "hubspot_owner_id", operator: "EQ", value: ownerId });
-        if (status === "open") {
-          filters.push({ propertyName: "hs_is_closed", operator: "EQ", value: "false" });
-        }
+        // Filter by owner only — frontend filters out closed stages by name.
+        // Avoids hs_is_closed inconsistencies across HubSpot account configs.
+        const filters = ownerId
+          ? [{ propertyName: "hubspot_owner_id", operator: "EQ", value: ownerId }]
+          : [];
 
         const data = await hsPost(env, "/crm/v3/objects/deals/search", {
           filterGroups: [{ filters }],
           properties: [
-            "dealname", "amount", "dealstage", "closedate",
+            "dealname", "amount", "dealstage", "pipeline", "closedate",
             "hubspot_owner_id", "notes_last_updated", "hs_lastmodifieddate",
             "hs_deal_stage_probability", "hs_is_closed",
           ],
@@ -199,13 +198,19 @@ export default {
       }
 
       // ── GET /hubspot/stages ──────────────────────────────────────
-      // Returns { stageId: "Stage Label", ... } for all deal pipelines
+      // Returns { stageId: "Stage Label", ... } for deals + leads pipelines
       if (path === "/hubspot/stages" && request.method === "GET") {
-        const data = await hsGet(env, "/crm/v3/pipelines/deals");
+        const [dealPipelines, leadPipelines] = await Promise.allSettled([
+          hsGet(env, "/crm/v3/pipelines/deals"),
+          hsGet(env, "/crm/v3/pipelines/leads"),
+        ]);
         const stageMap = {};
-        for (const pipeline of (data.results || [])) {
-          for (const stage of (pipeline.stages || [])) {
-            stageMap[stage.id] = stage.label;
+        for (const result of [dealPipelines, leadPipelines]) {
+          if (result.status !== "fulfilled") continue;
+          for (const pipeline of (result.value.results || [])) {
+            for (const stage of (pipeline.stages || [])) {
+              stageMap[stage.id] = stage.label;
+            }
           }
         }
         return json(stageMap, 200, corsHeaders);
