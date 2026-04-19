@@ -222,6 +222,12 @@ export default {
         return json(data, 200, corsHeaders);
       }
 
+      // ── GET /hubspot/portal ───────────────────────────────────────
+      if (path === "/hubspot/portal" && request.method === "GET") {
+        const data = await hsGet(env, "/account-info/v3/details");
+        return json({ portalId: data.portalId }, 200, corsHeaders);
+      }
+
       // ── POST /hubspot/activity ───────────────────────────────────
       // Log a completed task (priority action checked off by rep)
       if (path === "/hubspot/activity" && request.method === "POST") {
