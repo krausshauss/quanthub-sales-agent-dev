@@ -71,7 +71,7 @@ window.App = (() => {
       }
     } catch (err) {
       console.error("[App] AI load failed:", err);
-      window.PriorityFeed.render(null);
+      window.PriorityFeed.renderError(err.message);
     }
   }
 

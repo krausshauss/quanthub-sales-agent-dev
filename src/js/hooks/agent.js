@@ -20,8 +20,11 @@ window.Agent = (() => {
         messages: [{ role: "user", content: userMessage }],
       }),
     });
-    if (!res.ok) throw new Error(`Agent call failed: ${res.status}`);
     const data = await res.json();
+    if (!res.ok) {
+      const msg = data?.error?.message || `Agent call failed: ${res.status}`;
+      throw new Error(msg);
+    }
     return data.content?.[0]?.text || "";
   }
 

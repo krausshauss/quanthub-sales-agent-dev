@@ -151,6 +151,12 @@ window.PriorityFeed = (() => {
       .replace(/"/g, "&quot;");
   }
 
-  return { render, renderLoading, renderInsight, renderAgentResponse, onItemClick, onCheckboxChange };
+  function renderError(msg) {
+    const feed = document.getElementById("priority-feed");
+    if (!feed) return;
+    feed.innerHTML = `<div class="error-bar">${msg || "Claude API unavailable. Check API key or account credits."}</div>`;
+  }
+
+  return { render, renderLoading, renderInsight, renderError, renderAgentResponse, onItemClick, onCheckboxChange };
 
 })();
