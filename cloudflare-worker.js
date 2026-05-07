@@ -237,7 +237,7 @@ export default {
       if (path === "/hubspot/engagements" && request.method === "GET") {
         const owner   = url.searchParams.get("owner") || "";
         const ownerId = await resolveOwnerId(env, owner);
-        const since   = new Date(Date.now() - 14 * 86400000).getTime().toString();
+        const since   = new Date(Date.now() - 30 * 86400000).getTime().toString();
 
         const ownerFilter = ownerId
           ? [{ propertyName: "hubspot_owner_id", operator: "EQ", value: ownerId }]
