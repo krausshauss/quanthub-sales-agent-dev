@@ -230,7 +230,10 @@ export default {
 
       // ── GET /hubspot/engagements ─────────────────────────────────
       // Returns last 14 days of meetings, calls, emails for a rep
-      // including Fathom AI summaries (hs_internal_meeting_notes)
+      // including Fathom AI summaries (hs_internal_meeting_notes).
+      // NOTE: meetings are NOT filtered by owner — Fathom logs meetings
+      // via contact/deal associations, not hubspot_owner_id, so we fetch
+      // all recent meetings with content and let Claude filter relevance.
       if (path === "/hubspot/engagements" && request.method === "GET") {
         const owner   = url.searchParams.get("owner") || "";
         const ownerId = await resolveOwnerId(env, owner);
@@ -241,24 +244,24 @@ export default {
           : [];
 
         const [meetingsRes, callsRes, emailsRes] = await Promise.allSettled([
+          // Meetings: no owner filter — Fathom associates via contact/deal, not owner
           hsPost(env, "/crm/v3/objects/meetings/search", {
             properties: [
               "hs_meeting_title", "hs_timestamp", "hs_meeting_outcome",
-              "hs_internal_meeting_notes", "hs_meeting_body",
-              "hubspot_owner_id", "hs_created_by_user_id",
+              "hs_internal_meeting_notes", "hs_meeting_body", "hs_note_body",
+              "hubspot_owner_id",
             ],
             filterGroups: [{ filters: [
               { propertyName: "hs_timestamp", operator: "GTE", value: since },
-              ...ownerFilter,
             ]}],
             sorts: [{ propertyName: "hs_timestamp", direction: "DESCENDING" }],
-            limit: 10,
+            limit: 15,
           }),
+          // Calls: filter by owner — these are logged directly by the rep
           hsPost(env, "/crm/v3/objects/calls/search", {
             properties: [
               "hs_call_title", "hs_timestamp", "hs_call_outcome",
-              "hs_call_body", "hs_call_duration",
-              "hubspot_owner_id", "hs_created_by_user_id",
+              "hs_call_body", "hs_call_duration", "hubspot_owner_id",
             ],
             filterGroups: [{ filters: [
               { propertyName: "hs_timestamp", operator: "GTE", value: since },
@@ -267,6 +270,7 @@ export default {
             sorts: [{ propertyName: "hs_timestamp", direction: "DESCENDING" }],
             limit: 10,
           }),
+          // Emails: filter by owner
           hsPost(env, "/crm/v3/objects/emails/search", {
             properties: [
               "hs_email_subject", "hs_timestamp", "hs_email_direction",
@@ -287,7 +291,9 @@ export default {
           title:     r.properties.hs_meeting_title || "Meeting",
           timestamp: r.properties.hs_timestamp,
           outcome:   r.properties.hs_meeting_outcome || "",
-          notes:     r.properties.hs_internal_meeting_notes || r.properties.hs_meeting_body || "",
+          notes:     r.properties.hs_internal_meeting_notes
+                     || r.properties.hs_meeting_body
+                     || r.properties.hs_note_body || "",
         }));
 
         const calls = (callsRes.value?.results || []).map(r => ({
@@ -309,9 +315,9 @@ export default {
           notes:     r.properties.hs_email_text || "",
         }));
 
-        // Merge and sort newest-first, cap total at 15
+        // Merge, drop items with no content, sort newest-first, cap at 15
         const all = [...meetings, ...calls, ...emails]
-          .filter(e => e.notes && e.notes.trim().length > 20)
+          .filter(e => e.notes && e.notes.trim().length > 10)
           .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
           .slice(0, 15);
 

@@ -51,16 +51,26 @@ window.ActivityTracker = (() => {
 
 
 /**
- * dealVelocity.js — pipeline by stage
+ * dealVelocity.js — pipeline velocity by stage
+ * Shows per-stage deal value, count, and avg days since last contact.
  */
 window.DealVelocity = (() => {
 
-  const COLORS = ["#818cf8", "#22c97a", "#f5a623", "#60a5fa", "#fb923c", "#f87171"];
+  // Light-theme colors that read well on white backgrounds
+  const COLORS = ["#0077B5", "#0EA5E9", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6"];
 
   function fmtMoney(n) {
     if (n >= 1_000_000) return `$${(n/1_000_000).toFixed(1)}M`;
     if (n >= 1_000)     return `$${(n/1_000).toFixed(0)}K`;
-    return `$${n}`;
+    return `$${Math.round(n)}`;
+  }
+
+  function staleBadge(avgDays) {
+    if (avgDays === null) return "";
+    const d = Math.round(avgDays);
+    if (d <= 3)  return `<span class="vel-badge vel-green">${d}d avg</span>`;
+    if (d <= 7)  return `<span class="vel-badge vel-amber">${d}d avg</span>`;
+    return           `<span class="vel-badge vel-red">${d}d avg</span>`;
   }
 
   function render(deals) {
@@ -68,20 +78,20 @@ window.DealVelocity = (() => {
     if (!el) return;
 
     if (!deals || !deals.length) {
-      el.innerHTML = `<div style="color:#4b5563;font-size:12px;padding:8px 0">No open deals found.</div>`;
+      el.innerHTML = `<div class="vel-empty">No open deals in pipeline.</div>`;
       return;
     }
 
-    // Aggregate by stage
+    // Aggregate by stage: value, count, total stale days (for avg)
     const stageMap = {};
     deals.forEach(d => {
       const key = d.stageLabel || d.stage || "Unknown";
-      if (!stageMap[key]) stageMap[key] = { value: 0, count: 0 };
-      stageMap[key].value += d.amount;
-      stageMap[key].count++;
+      if (!stageMap[key]) stageMap[key] = { value: 0, count: 0, totalDays: 0 };
+      stageMap[key].value     += d.amount;
+      stageMap[key].count     += 1;
+      stageMap[key].totalDays += (d.daysSinceContact || 0);
     });
 
-    // Sort by value desc, exclude closed
     const stages = Object.entries(stageMap)
       .filter(([k]) => !k.toLowerCase().includes("closed"))
       .sort((a, b) => b[1].value - a[1].value)
@@ -91,6 +101,7 @@ window.DealVelocity = (() => {
 
     el.innerHTML = stages.map(([stage, data], i) => {
       const barPct = Math.round((data.value / maxVal) * 100);
+      const avgDays = data.count > 0 ? data.totalDays / data.count : null;
       return `
         <div class="stage-row">
           <span class="stage-name">${stage}</span>
@@ -99,6 +110,7 @@ window.DealVelocity = (() => {
           </div>
           <span class="stage-val">${fmtMoney(data.value)}</span>
           <span class="stage-count">${data.count}</span>
+          ${staleBadge(avgDays)}
         </div>`;
     }).join("");
   }

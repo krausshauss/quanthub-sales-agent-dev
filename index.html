@@ -86,6 +86,7 @@
       <section class="panel panel-priorities">
         <div class="panel-header">
           <span class="panel-title">▸ Today's Priority Actions</span>
+          <span class="info-tip" data-tip="Top 5 actions ranked by Claude AI using your open deals, close dates, at-risk accounts, hot leads, and active sequences. Score factors in pipeline coverage, activity pace, and deal risk. Refreshes every 15 min.">?</span>
           <span class="panel-hint" id="priority-timestamp"></span>
         </div>
         <div id="priority-feed" class="priority-feed">
@@ -112,6 +113,7 @@
       <section class="panel panel-checklist">
         <div class="panel-header">
           <span class="panel-title">✦ Follow-Up Checklist</span>
+          <span class="info-tip" data-tip="Action items extracted by Claude AI from your last 14 days of meetings, calls, and emails — including Fathom AI meeting summaries. High priority = explicitly promised or deal at risk. Check off items as you complete them.">?</span>
           <span class="panel-hint" id="checklist-meta"></span>
         </div>
         <div id="checklist-feed" class="checklist-feed">
@@ -128,6 +130,7 @@
         <section class="panel panel-activity">
           <div class="panel-header">
             <span class="panel-title">Activity Tracker · Today</span>
+            <span class="info-tip" data-tip="Today's logged activity vs. daily targets. Pulls completed calls, emails, meetings, tasks, sequence steps, and CRM updates from HubSpot. Targets are set in config.js.">?</span>
           </div>
           <div id="activity-tracker" class="activity-tracker">
             <div class="skeleton-block" style="height:20px"></div>
@@ -142,6 +145,7 @@
         <section class="panel panel-velocity">
           <div class="panel-header">
             <span class="panel-title">Deal Velocity · Pipeline</span>
+            <span class="info-tip" data-tip="Open deals grouped by pipeline stage. Bar = relative value, $ = total value in stage, # = deal count. Badge shows average days since last contact — green ≤3d, amber 4–7d, red 8d+ (stale).">?</span>
           </div>
           <div id="deal-velocity" class="deal-velocity">
             <div class="skeleton-block" style="height:20px"></div>
@@ -155,6 +159,7 @@
         <section class="panel panel-leads">
           <div class="panel-header">
             <span class="panel-title">Lead Activity · Hot Signals</span>
+            <span class="info-tip" data-tip="HubSpot Lead objects sorted by last activity. Hot = active within 48 hrs (red dot), Warm = 24–48 hrs (amber). Click a lead to expand details and ask the AI agent for outreach guidance.">?</span>
             <span class="badge badge-new" id="lead-count-badge" style="display:none"></span>
           </div>
           <div id="lead-feed" class="lead-feed">
