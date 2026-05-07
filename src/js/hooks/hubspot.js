@@ -163,6 +163,21 @@ window.HubSpot = (() => {
     }));
   }
 
+  // ── Recent engagements (meetings, calls, emails) ──────────────────
+  async function fetchEngagements(ownerEmail) {
+    const raw = await api(`/hubspot/engagements?owner=${encodeURIComponent(ownerEmail)}`);
+    return (raw.results || []).map(e => ({
+      type:      e.type,
+      id:        e.id,
+      title:     e.title,
+      timestamp: e.timestamp,
+      outcome:   e.outcome || "",
+      direction: e.direction || "",
+      notes:     e.notes || "",
+      daysAgo:   daysSince(e.timestamp),
+    }));
+  }
+
   // ── Bulk load for one rep ──────────────────────────────────────────
   async function loadAll(ownerEmail) {
     await fetchStageLabels(); // must complete before fetchDeals uses stageLabel()
@@ -183,6 +198,6 @@ window.HubSpot = (() => {
     };
   }
 
-  return { loadAll, fetchOwners, fmtMoney };
+  return { loadAll, fetchEngagements, fetchOwners, fmtMoney };
 
 })();

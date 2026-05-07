@@ -40,13 +40,32 @@ window.App = (() => {
       updateLiveBadge("live");
       setLastRefresh();
 
-      // 2. Load AI priorities in parallel (slower)
+      // 2. Load AI priorities + follow-up checklist in parallel (slower)
       loadAI(_data);
+      loadChecklist(_data);
 
     } catch (err) {
       console.error("[App] Data load failed:", err);
       showError(`HubSpot data error: ${err.message}`);
       updateLiveBadge("error");
+    }
+  }
+
+  // ── Load Follow-Up Checklist from engagements (non-blocking) ────────
+  async function loadChecklist(data) {
+    const repName = emailToName(_repEmail);
+    try {
+      window.ChecklistFeed.renderLoading();
+      const engagements = await window.HubSpot.fetchEngagements(_repEmail);
+      const checklist = await window.Agent.generateFollowUpChecklist(repName, engagements, data.deals);
+      if (checklist) {
+        window.ChecklistFeed.render(checklist);
+      } else {
+        window.ChecklistFeed.renderError("No actionable follow-ups found in recent engagements.");
+      }
+    } catch (err) {
+      console.error("[App] Checklist load failed:", err);
+      window.ChecklistFeed.renderError(err.message);
     }
   }
 

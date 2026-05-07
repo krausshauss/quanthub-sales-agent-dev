@@ -228,6 +228,96 @@ export default {
         return json({ portalId: data.portalId }, 200, corsHeaders);
       }
 
+      // ── GET /hubspot/engagements ─────────────────────────────────
+      // Returns last 14 days of meetings, calls, emails for a rep
+      // including Fathom AI summaries (hs_internal_meeting_notes)
+      if (path === "/hubspot/engagements" && request.method === "GET") {
+        const owner   = url.searchParams.get("owner") || "";
+        const ownerId = await resolveOwnerId(env, owner);
+        const since   = new Date(Date.now() - 14 * 86400000).getTime().toString();
+
+        const ownerFilter = ownerId
+          ? [{ propertyName: "hubspot_owner_id", operator: "EQ", value: ownerId }]
+          : [];
+
+        const [meetingsRes, callsRes, emailsRes] = await Promise.allSettled([
+          hsPost(env, "/crm/v3/objects/meetings/search", {
+            properties: [
+              "hs_meeting_title", "hs_timestamp", "hs_meeting_outcome",
+              "hs_internal_meeting_notes", "hs_meeting_body",
+              "hubspot_owner_id", "hs_created_by_user_id",
+            ],
+            filterGroups: [{ filters: [
+              { propertyName: "hs_timestamp", operator: "GTE", value: since },
+              ...ownerFilter,
+            ]}],
+            sorts: [{ propertyName: "hs_timestamp", direction: "DESCENDING" }],
+            limit: 10,
+          }),
+          hsPost(env, "/crm/v3/objects/calls/search", {
+            properties: [
+              "hs_call_title", "hs_timestamp", "hs_call_outcome",
+              "hs_call_body", "hs_call_duration",
+              "hubspot_owner_id", "hs_created_by_user_id",
+            ],
+            filterGroups: [{ filters: [
+              { propertyName: "hs_timestamp", operator: "GTE", value: since },
+              ...ownerFilter,
+            ]}],
+            sorts: [{ propertyName: "hs_timestamp", direction: "DESCENDING" }],
+            limit: 10,
+          }),
+          hsPost(env, "/crm/v3/objects/emails/search", {
+            properties: [
+              "hs_email_subject", "hs_timestamp", "hs_email_direction",
+              "hs_email_text", "hubspot_owner_id",
+            ],
+            filterGroups: [{ filters: [
+              { propertyName: "hs_timestamp", operator: "GTE", value: since },
+              ...ownerFilter,
+            ]}],
+            sorts: [{ propertyName: "hs_timestamp", direction: "DESCENDING" }],
+            limit: 10,
+          }),
+        ]);
+
+        const meetings = (meetingsRes.value?.results || []).map(r => ({
+          type:      "meeting",
+          id:        r.id,
+          title:     r.properties.hs_meeting_title || "Meeting",
+          timestamp: r.properties.hs_timestamp,
+          outcome:   r.properties.hs_meeting_outcome || "",
+          notes:     r.properties.hs_internal_meeting_notes || r.properties.hs_meeting_body || "",
+        }));
+
+        const calls = (callsRes.value?.results || []).map(r => ({
+          type:      "call",
+          id:        r.id,
+          title:     r.properties.hs_call_title || "Call",
+          timestamp: r.properties.hs_timestamp,
+          outcome:   r.properties.hs_call_outcome || "",
+          notes:     r.properties.hs_call_body || "",
+          duration:  r.properties.hs_call_duration || null,
+        }));
+
+        const emails = (emailsRes.value?.results || []).map(r => ({
+          type:      "email",
+          id:        r.id,
+          title:     r.properties.hs_email_subject || "Email",
+          timestamp: r.properties.hs_timestamp,
+          direction: r.properties.hs_email_direction || "",
+          notes:     r.properties.hs_email_text || "",
+        }));
+
+        // Merge and sort newest-first, cap total at 15
+        const all = [...meetings, ...calls, ...emails]
+          .filter(e => e.notes && e.notes.trim().length > 20)
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .slice(0, 15);
+
+        return json({ results: all }, 200, corsHeaders);
+      }
+
       // ── POST /hubspot/activity ───────────────────────────────────
       // Log a completed task (priority action checked off by rep)
       if (path === "/hubspot/activity" && request.method === "POST") {

@@ -114,6 +114,63 @@ Generate today's priority action plan.`;
     return parseJSON(raw);
   }
 
+  // ── Follow-Up Checklist from recent engagements ───────────────────
+  // Returns: { items[], generatedFrom }
+  async function generateFollowUpChecklist(repName, engagements, deals) {
+    if (!engagements || !engagements.length) return null;
+
+    // Build a compact summary of each engagement with content
+    const engSummary = engagements.slice(0, 8).map(e => {
+      const when = e.daysAgo === 0 ? "today" : e.daysAgo === 1 ? "yesterday" : `${e.daysAgo}d ago`;
+      const notesSnippet = (e.notes || "").slice(0, 600).replace(/\s+/g, " ").trim();
+      return `[${e.type.toUpperCase()} ${when}] "${e.title}"${e.outcome ? ` (${e.outcome})` : ""}\n${notesSnippet}`;
+    }).join("\n\n---\n\n");
+
+    const dealNames = deals.slice(0, 10).map(d => d.name).join(", ");
+
+    const systemPrompt = `You are a sales follow-up coach for ${repName}.
+Analyze recent meeting notes, call logs, and emails to extract specific follow-up actions.
+Fathom AI meeting summaries appear as internal notes — treat action items and next steps in those summaries as high priority.
+Return ONLY valid JSON — no markdown, no preamble.
+
+Return exactly this shape:
+{
+  "items": [
+    {
+      "task": <string, specific action, max 80 chars, start with a verb>,
+      "deal": <string, deal or company name this relates to, or null>,
+      "contact": <string, person's name to follow up with, or null>,
+      "context": <string, 1 sentence — why this is needed based on the engagement, max 100 chars>,
+      "priority": <"high" | "medium" | "low">,
+      "source": <string, "Meeting: [title]" or "Call: [title]" or "Email: [subject]">
+    }
+  ],
+  "generatedFrom": <string, e.g. "3 meetings, 2 calls in the last 7 days">
+}
+
+Rules:
+- Extract only concrete, actionable items (send a proposal, schedule a demo, share a resource, etc.)
+- Prioritize items explicitly mentioned as "action items", "next steps", or "follow-ups" in meeting notes
+- high = explicitly promised / committed / deal at risk
+- medium = mentioned but not urgent
+- low = nice-to-do, informational
+- Max 8 items total, ranked high → low priority
+- If an engagement has no actionable content, skip it`;
+
+    const userMessage = `Sales rep: ${repName}
+Today: ${new Date().toDateString()}
+
+Active deals for context: ${dealNames}
+
+RECENT ENGAGEMENTS (newest first):
+${engSummary}
+
+Extract all follow-up actions from these engagements.`;
+
+    const raw = await callClaude(systemPrompt, userMessage, 1200);
+    return parseJSON(raw);
+  }
+
   // ── Ad-hoc agent question ──────────────────────────────────────────
   // "What should I do after this call?" etc.
   async function askQuestion(question, repName, data) {
@@ -169,6 +226,6 @@ Hot leads: ${leads.filter(l => l.isHot).length}`;
     return { blocks };
   }
 
-  return { generateDailyPriorities, askQuestion, generateSlackDigest };
+  return { generateDailyPriorities, generateFollowUpChecklist, askQuestion, generateSlackDigest };
 
 })();
