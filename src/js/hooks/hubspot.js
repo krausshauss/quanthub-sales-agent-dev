@@ -198,6 +198,17 @@ window.HubSpot = (() => {
     };
   }
 
-  return { loadAll, fetchEngagements, fetchOwners, fmtMoney };
+  async function fetchPortalId() {
+    if (window.CONFIG.PORTAL_ID) return window.CONFIG.PORTAL_ID;
+    try {
+      const data = await api("/hubspot/portal");
+      window.CONFIG.PORTAL_ID = data.portalId;
+      return data.portalId;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  return { loadAll, fetchEngagements, fetchOwners, fetchPortalId, fmtMoney };
 
 })();

@@ -121,7 +121,11 @@ Generate today's priority action plan.`;
 
     // Build a compact summary of each engagement with content
     const engSummary = engagements.slice(0, 8).map(e => {
-      const when = e.daysAgo === 0 ? "today" : e.daysAgo === 1 ? "yesterday" : `${e.daysAgo}d ago`;
+      const when = e.daysAgo < 0
+        ? `in ${Math.abs(e.daysAgo)}d`
+        : e.daysAgo === 0 ? "today"
+        : e.daysAgo === 1 ? "yesterday"
+        : `${e.daysAgo}d ago`;
       const notesSnippet = (e.notes || "").slice(0, 600).replace(/\s+/g, " ").trim();
       return `[${e.type.toUpperCase()} ${when}] "${e.title}"${e.outcome ? ` (${e.outcome})` : ""}\n${notesSnippet}`;
     }).join("\n\n---\n\n");

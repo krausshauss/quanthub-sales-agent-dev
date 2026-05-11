@@ -53,14 +53,22 @@ window.ChecklistFeed = (() => {
       meta.textContent = checklist.generatedFrom;
     }
 
+    const hsBase = window.CONFIG.PORTAL_ID
+      ? `https://app.hubspot.com/contacts/${window.CONFIG.PORTAL_ID}`
+      : null;
+
     feed.innerHTML = _items.map((item, i) => {
       const ps = PRIORITY_STYLE[item.priority] || PRIORITY_STYLE.medium;
       const icon = sourceIcon(item.source);
       const dealBadge = item.deal
-        ? `<span class="cl-deal">${escHtml(item.deal)}</span>`
+        ? (hsBase && item.dealId
+            ? `<a class="cl-deal cl-link" href="${hsBase}/deal/${item.dealId}" target="_blank" rel="noopener">${escHtml(item.deal)} ↗</a>`
+            : `<span class="cl-deal">${escHtml(item.deal)}</span>`)
         : "";
       const contactBadge = item.contact
-        ? `<span class="cl-contact">${escHtml(item.contact)}</span>`
+        ? (hsBase && item.contactId
+            ? `<a class="cl-contact cl-link" href="${hsBase}/contact/${item.contactId}" target="_blank" rel="noopener">${escHtml(item.contact)} ↗</a>`
+            : `<span class="cl-contact">${escHtml(item.contact)}</span>`)
         : "";
 
       return `

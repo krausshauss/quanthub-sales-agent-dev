@@ -292,6 +292,12 @@ html, body {
   font-size: 9px; color: var(--text-hint); font-family: var(--font-mono);
   white-space: nowrap;
 }
+a.cl-link {
+  text-decoration: none; cursor: pointer;
+}
+a.cl-link:hover {
+  filter: brightness(0.85); text-decoration: underline;
+}
 
 .cl-empty {
   padding: 20px; font-size: 12px; color: var(--text-hint);

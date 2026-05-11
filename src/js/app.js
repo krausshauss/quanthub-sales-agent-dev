@@ -22,6 +22,7 @@ window.App = (() => {
       await loadRepSelector();
     }
 
+    window.HubSpot.fetchPortalId(); // warm cache non-blocking — used for deep links
     await refresh();
 
     // Auto-refresh loop
@@ -59,6 +60,7 @@ window.App = (() => {
       const engagements = await window.HubSpot.fetchEngagements(_repEmail);
       const checklist = await window.Agent.generateFollowUpChecklist(repName, engagements, data.deals);
       if (checklist) {
+        enrichChecklistLinks(checklist, data);
         window.ChecklistFeed.render(checklist);
       } else {
         window.ChecklistFeed.renderError("No actionable follow-ups found in recent engagements.");
@@ -257,6 +259,32 @@ window.App = (() => {
     return (email || "").split("@")[0]
       .replace(/[._]/g, " ")
       .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  // ── Enrich checklist items with HubSpot record IDs for deep links ───
+  function enrichChecklistLinks(checklist, data) {
+    if (!checklist?.items) return;
+    checklist.items = checklist.items.map(item => ({
+      ...item,
+      dealId:    matchDealId(item.deal, data.deals),
+      contactId: matchContactId(item.contact, data.contacts),
+    }));
+  }
+
+  function matchDealId(dealName, deals) {
+    if (!dealName || !deals?.length) return null;
+    const q = dealName.toLowerCase();
+    const match = deals.find(d => {
+      const n = d.name.toLowerCase();
+      return n === q || n.includes(q) || q.includes(n);
+    });
+    return match?.id || null;
+  }
+
+  function matchContactId(contactName, contacts) {
+    if (!contactName || !contacts?.length) return null;
+    const q = contactName.toLowerCase();
+    return contacts.find(c => c.name.toLowerCase() === q)?.id || null;
   }
 
   // ── Enter key on agent input ───────────────────────────────────────
