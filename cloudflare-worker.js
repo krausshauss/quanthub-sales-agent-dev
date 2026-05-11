@@ -229,11 +229,12 @@ export default {
       }
 
       // ── GET /hubspot/engagements ─────────────────────────────────
-      // Returns last 14 days of meetings, calls, emails for a rep
-      // including Fathom AI summaries (hs_internal_meeting_notes).
-      // NOTE: meetings are NOT filtered by owner — Fathom logs meetings
-      // via contact/deal associations, not hubspot_owner_id, so we fetch
-      // all recent meetings with content and let Claude filter relevance.
+      // Returns last 30 days of meetings, calls, emails for a rep.
+      // Meetings use a two-pass strategy:
+      //   Pass 1 — filter by hubspot_owner_id (rep's directly-created meetings)
+      //   Pass 2 — meetings associated with the rep's open deals (catches
+      //            Fathom AI meetings, which associate via deal, not owner ID)
+      // Results are merged and deduplicated before returning.
       if (path === "/hubspot/engagements" && request.method === "GET") {
         const owner   = url.searchParams.get("owner") || "";
         const ownerId = await resolveOwnerId(env, owner);
@@ -243,21 +244,67 @@ export default {
           ? [{ propertyName: "hubspot_owner_id", operator: "EQ", value: ownerId }]
           : [];
 
-        const [meetingsRes, callsRes, emailsRes] = await Promise.allSettled([
-          // Meetings: no owner filter — Fathom associates via contact/deal, not owner
+        const meetingProps = [
+          "hs_meeting_title", "hs_timestamp", "hs_meeting_outcome",
+          "hs_internal_meeting_notes", "hs_meeting_body", "hs_note_body",
+          "hubspot_owner_id",
+        ];
+
+        // Fetch calls, emails, and both meeting passes in parallel
+        const [meetingsOwnerRes, meetingsDealRes, callsRes, emailsRes] = await Promise.allSettled([
+
+          // Pass 1: meetings owned by the rep directly
           hsPost(env, "/crm/v3/objects/meetings/search", {
-            properties: [
-              "hs_meeting_title", "hs_timestamp", "hs_meeting_outcome",
-              "hs_internal_meeting_notes", "hs_meeting_body", "hs_note_body",
-              "hubspot_owner_id",
-            ],
+            properties: meetingProps,
             filterGroups: [{ filters: [
               { propertyName: "hs_timestamp", operator: "GTE", value: since },
+              ...ownerFilter,
             ]}],
             sorts: [{ propertyName: "hs_timestamp", direction: "DESCENDING" }],
             limit: 15,
           }),
-          // Calls: filter by owner — these are logged directly by the rep
+
+          // Pass 2: meetings on the rep's open deals (Fathom path)
+          // Step a: get rep's open deal IDs
+          (async () => {
+            if (!ownerId) return { results: [] };
+            const dealData = await hsPost(env, "/crm/v3/objects/deals/search", {
+              properties: ["dealname"],
+              filterGroups: [{ filters: [
+                { propertyName: "hubspot_owner_id", operator: "EQ", value: ownerId },
+                { propertyName: "hs_is_closed",     operator: "EQ", value: "false" },
+              ]}],
+              limit: 50,
+            });
+            const dealIds = (dealData.results || []).map(d => d.id);
+            if (!dealIds.length) return { results: [] };
+
+            // Step b: get meeting associations for those deals
+            const assocData = await hsPost(
+              env,
+              "/crm/v4/associations/deals/meetings/batch/read",
+              { inputs: dealIds.slice(0, 50).map(id => ({ id })) }
+            );
+            const meetingIds = [...new Set(
+              (assocData.results || []).flatMap(r => (r.to || []).map(t => String(t.toObjectId)))
+            )];
+            if (!meetingIds.length) return { results: [] };
+
+            // Step c: batch-read those meetings
+            const batchData = await hsPost(env, "/crm/v3/objects/meetings/batch/read", {
+              properties: meetingProps,
+              inputs: meetingIds.slice(0, 20).map(id => ({ id })),
+            });
+            // Filter to recent ones only
+            return {
+              results: (batchData.results || []).filter(m => {
+                const ts = m.properties.hs_timestamp;
+                return ts && new Date(ts).getTime() >= parseInt(since);
+              }),
+            };
+          })(),
+
+          // Calls: filter by owner — logged directly by rep
           hsPost(env, "/crm/v3/objects/calls/search", {
             properties: [
               "hs_call_title", "hs_timestamp", "hs_call_outcome",
@@ -270,6 +317,7 @@ export default {
             sorts: [{ propertyName: "hs_timestamp", direction: "DESCENDING" }],
             limit: 10,
           }),
+
           // Emails: filter by owner
           hsPost(env, "/crm/v3/objects/emails/search", {
             properties: [
@@ -285,7 +333,18 @@ export default {
           }),
         ]);
 
-        const meetings = (meetingsRes.value?.results || []).map(r => ({
+        // Merge and deduplicate meetings from both passes
+        const seenMeetingIds = new Set();
+        const allMeetingResults = [
+          ...(meetingsOwnerRes.value?.results || []),
+          ...(meetingsDealRes.value?.results  || []),
+        ].filter(m => {
+          if (seenMeetingIds.has(m.id)) return false;
+          seenMeetingIds.add(m.id);
+          return true;
+        });
+
+        const meetings = allMeetingResults.map(r => ({
           type:      "meeting",
           id:        r.id,
           title:     r.properties.hs_meeting_title || "Meeting",
