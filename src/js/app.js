@@ -41,7 +41,10 @@ window.App = (() => {
       updateLiveBadge("live");
       setLastRefresh();
 
-      // 2. Load AI priorities + follow-up checklist in parallel (slower)
+      // 2. Build forecast card (fast — no AI needed)
+      buildForecastCard(_data);
+
+      // 3. Load AI priorities + follow-up checklist in parallel (slower)
       loadAI(_data);
       loadChecklist(_data);
 
@@ -259,6 +262,79 @@ window.App = (() => {
     return (email || "").split("@")[0]
       .replace(/[._]/g, " ")
       .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  // ── Personal Q2 Forecast Card ─────────────────────────────────────
+  function buildForecastCard(data) {
+    const el = document.getElementById('forecast-card');
+    if (!el || !data) return;
+
+    const deals    = data.deals || [];
+    const repEmail = _repEmail;
+
+    // Stage probability map (mirrors HubSpot defaults)
+    const PROB = {
+      appointmentscheduled: 0.20, qualifiedtobuy: 0.40,
+      presentationscheduled: 0.60, decisionmakerboughtin: 0.70,
+      contractsent: 0.90, default: 0.30,
+    };
+    const probFor = stage => PROB[stage] || PROB.default;
+
+    const weightedPipe = deals.reduce((s, d) => s + d.amount * probFor(d.stage), 0);
+    const rawPipe      = deals.reduce((s, d) => s + d.amount, 0);
+
+    // Quarterly quota from config (per rep)
+    const quota     = window.CONFIG.QUARTERLY_QUOTA || 100000;
+    const qtrCW     = 0; // we don't have rep-level YTD CW in sales agent data — show pipeline-based
+    const projected = weightedPipe;
+    const projLow   = projected * 0.75;
+    const projHigh  = projected * 1.25;
+
+    // Weeks to quarter end
+    const now = new Date();
+    const qEnds = [new Date(now.getFullYear(),2,31), new Date(now.getFullYear(),5,30),
+                   new Date(now.getFullYear(),8,30), new Date(now.getFullYear(),11,31)];
+    const qEnd     = qEnds.find(d => d >= now) || qEnds[3];
+    const weeksLeft = Math.max(0, Math.ceil((qEnd - now) / (7 * 864e5)));
+
+    // Runway widths as % of quota
+    const pipePct = Math.min(94, (projHigh / quota) * 100);
+    const verdict = projected >= quota ? 'on-track' : projected >= quota * 0.6 ? 'at-risk' : 'behind';
+    const verdictLbl = verdict === 'on-track' ? '✓ On Track' : verdict === 'at-risk' ? '⚠ At Risk' : '▼ Behind Pace';
+
+    const fK = v => v >= 1e6 ? '$' + (v/1e6).toFixed(1) + 'M' : '$' + (v/1000).toFixed(0) + 'K';
+    const gapColor = projected >= quota ? 'var(--accent)' : 'var(--red)';
+
+    el.innerHTML = `
+      <div class="fc-runway-labels">
+        <span style="color:var(--brand);font-weight:700">${fK(projected)} weighted pipe</span>
+        <span>$${(quota/1000).toFixed(0)}K quota</span>
+      </div>
+      <div class="fc-runway">
+        <div class="fc-runway-cw"   style="width:${Math.min(94, (projected/quota*100)).toFixed(1)}%" title="Weighted pipeline ${fK(projected)}"></div>
+        <div class="fc-runway-proj" style="width:${Math.min(94 - projected/quota*100, (projHigh-projected)/quota*100).toFixed(1)}%" title="Upside to ${fK(projHigh)}"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
+        <span class="fc-verdict fc-${verdict}">${verdictLbl}</span>
+        <span style="font-size:9px;color:var(--text-hint)">${weeksLeft} wk${weeksLeft!==1?'s':''} to ${qEnd.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
+      </div>
+      <div class="fc-stats">
+        <div class="fc-stat">
+          <div class="fc-stat-l">Open Pipeline</div>
+          <div class="fc-stat-v">${fK(rawPipe)}</div>
+          <div class="fc-stat-s">${deals.length} active deals</div>
+        </div>
+        <div class="fc-stat">
+          <div class="fc-stat-l">Weighted Forecast</div>
+          <div class="fc-stat-v">${fK(projected)}</div>
+          <div class="fc-stat-s">${fK(projLow)} – ${fK(projHigh)} range</div>
+        </div>
+        <div class="fc-stat">
+          <div class="fc-stat-l">Gap to Quota</div>
+          <div class="fc-stat-v" style="color:${gapColor}">${projected>=quota?'✓ Met':fK(Math.max(0,quota-projected))}</div>
+          <div class="fc-stat-s">$${(quota/1000).toFixed(0)}K quarterly target</div>
+        </div>
+      </div>`;
   }
 
   // ── Enrich checklist items with HubSpot record IDs for deep links ───

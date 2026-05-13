@@ -20,6 +20,9 @@ window.CONFIG = {
   // Set to true to show rep selector dropdown
   IS_MANAGER: false,
 
+  // ── Quota ─────────────────────────────────────────────────────────
+  QUARTERLY_QUOTA: 100000,   // per-rep quarterly quota ($100K)
+
   // ── Activity targets (per day) ────────────────────────────────────
   // Adjust to match your team's daily KPI targets
   ACTIVITY_TARGETS: {
