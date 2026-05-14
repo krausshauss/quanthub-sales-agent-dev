@@ -7,8 +7,31 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="src/css/main.css" />
+<script>
+(function(){
+  if(localStorage.getItem('qh-theme')==='dark') document.documentElement.classList.add('dark');
+  window._qhToggleDark=function(){
+    const d=document.documentElement.classList.toggle('dark');
+    localStorage.setItem('qh-theme',d?'dark':'light');
+    const l=document.getElementById('qh-theme-lbl');
+    if(l) l.textContent=d?'☀ Light':'🌙 Dark';
+  };
+})();
+</script>
 </head>
 <body>
+<nav class="qh-nav">
+  <span class="qh-nav-mark">QH</span>
+  <span class="qh-nav-sep"></span>
+  <div class="qh-nav-links">
+    <a href="https://krausshauss.github.io/quanthub-dashboard/" class="qh-nav-link">📊 Sales Scorecard</a>
+    <a href="https://krausshauss.github.io/quanthub-sales-agent-dev/" class="qh-nav-link qh-active">⚡ Sales Agent</a>
+    <a href="https://krausshauss.github.io/quanthub-product-analytics/" class="qh-nav-link">📦 Product Analytics</a>
+  </div>
+  <div class="qh-nav-right">
+    <button class="qh-nav-theme" onclick="window._qhToggleDark()"><span id="qh-theme-lbl">🌙 Dark</span></button>
+  </div>
+</nav>
 
   <!-- ── App Shell ───────────────────────────────────────────────── -->
   <div id="app">
