@@ -4,11 +4,29 @@ compatibility_date = "2024-01-01"
 workers_dev = true
 account_id = "20e7b178f91a4ca92328922dd22abdf2"
 
-[vars]
-ALLOWED_ORIGIN = "https://krausshauss.github.io"
+# Static assets (HTML, CSS, JS) served by the worker after auth check.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "404-page"
+
+# Note: the gated entry page (index.html) is imported into the worker as text
+# and served only after auth — see `import INDEX_HTML` in cloudflare-worker.js.
+# Only the harmless static src/* (CSS/JS/SVG) is served by [assets].
+
+# Secrets (set once via wrangler CLI — never stored here):
+#   wrangler secret put HUBSPOT_TOKEN       # HubSpot Private App token
+#   wrangler secret put ANTHROPIC_API_KEY   # sk-ant-...
+#   wrangler secret put PORTAL_PASSWORD     # password used to log into the portal
+#   wrangler secret put SESSION_SECRET      # long random string for HMAC-signing session cookies
+#   wrangler secret put SLACK_WEBHOOK_URL   # optional, for /slack/digest
+#
+# For the dev environment, append `--env dev` to each.
 
 [env.dev]
 name = "quanthub-sales-agent-dev"
 
-[env.dev.vars]
-ALLOWED_ORIGIN = "https://krausshauss.github.io"
+[env.dev.assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "404-page"

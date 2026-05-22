@@ -31,6 +31,10 @@ window.HubSpot = (() => {
       ...options,
       headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     });
+    if (res.status === 401) {
+      window.location.href = "/login";
+      throw new Error("Session expired");
+    }
     if (!res.ok) {
       const err = await res.text().catch(() => res.statusText);
       throw new Error(`Worker ${path}: ${res.status} — ${err}`);

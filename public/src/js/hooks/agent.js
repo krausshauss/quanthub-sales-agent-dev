@@ -20,6 +20,10 @@ window.Agent = (() => {
         messages: [{ role: "user", content: userMessage }],
       }),
     });
+    if (res.status === 401) {
+      window.location.href = "/login";
+      throw new Error("Session expired");
+    }
     const data = await res.json();
     if (!res.ok) {
       const msg = data?.error?.message || `Agent call failed: ${res.status}`;
