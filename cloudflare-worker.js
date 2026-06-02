@@ -1,5 +1,5 @@
 /**
- * cloudflare-worker.js  —  QuantHub Sales Agent
+ * cloudflare-worker.js  —  Dark Yeti Sales Agent
  * ─────────────────────────────────────────────
  * Secrets (set via: wrangler secret put <NAME>):
  *   HUBSPOT_TOKEN       — pat-na1-... (HubSpot Private App token)
@@ -580,7 +580,7 @@ function loginPage(errMsg = "", status = 200) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>QuantHub · Sign in</title>
+  <title>Dark Yeti · Sign in</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -588,19 +588,19 @@ function loginPage(errMsg = "", status = 200) {
     html, body { height: 100%; margin: 0; }
     body { font-family: 'Manrope', -apple-system, sans-serif; background: #0a0e1a; color: #e6edf3; display: flex; align-items: center; justify-content: center; padding: 1rem; }
     .card { background: #161b22; padding: 2.5rem 2rem; border-radius: 14px; width: 100%; max-width: 360px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); border: 1px solid #30363d; }
-    .brand { color: #0077B5; font-weight: 800; letter-spacing: 0.05em; font-size: 0.85rem; text-transform: uppercase; }
+    .brand { color: #2563EB; font-weight: 800; letter-spacing: 0.05em; font-size: 0.85rem; text-transform: uppercase; }
     h1 { margin: 0.25rem 0 1.5rem; font-size: 1.4rem; font-weight: 700; }
     label { display: block; font-size: 0.8rem; color: #8b949e; margin-bottom: 0.4rem; }
     input { width: 100%; padding: 0.75rem 0.9rem; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; font-family: inherit; font-size: 0.95rem; }
-    input:focus { outline: none; border-color: #0077B5; box-shadow: 0 0 0 3px rgba(0, 119, 181, 0.2); }
-    button { width: 100%; margin-top: 1.1rem; padding: 0.8rem; background: #0077B5; color: white; border: none; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+    input:focus { outline: none; border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235, 0.2); }
+    button { width: 100%; margin-top: 1.1rem; padding: 0.8rem; background: #2563EB; color: white; border: none; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.15s; }
     button:hover { background: #005c8a; }
     .err { color: #f85149; font-size: 0.85rem; margin-top: 0.9rem; min-height: 1.2em; text-align: center; }
   </style>
 </head>
 <body>
   <main class="card">
-    <div class="brand">QuantHub</div>
+    <div class="brand">Dark Yeti</div>
     <h1>Sign in</h1>
     <form method="POST" action="/auth">
       <label for="pw">Password</label>

@@ -141,8 +141,8 @@ Analyze recent meeting notes, call logs, and emails to extract specific follow-u
 Fathom AI meeting summaries appear as internal notes — treat action items and next steps in those summaries as high priority.
 
 CRITICAL — SCOPE RULE: Only extract follow-up items where ${repName} is personally responsible for the next action.
-Skip any engagement that is primarily led by or associated with a different QuantHub sales rep (Joe DeRario, Jason Rupert, Jakob Krause).
-Skip company-wide events, board meetings, and internal QuantHub-only meetings where ${repName} has no external follow-up.
+Skip any engagement that is primarily led by or associated with a different Dark Yeti sales rep (Joe DeRario, Jason Rupert, Jakob Krause).
+Skip company-wide events, board meetings, and internal Dark Yeti-only meetings where ${repName} has no external follow-up.
 If you cannot determine that ${repName} is the responsible party, skip the item.
 
 Return ONLY valid JSON — no markdown, no preamble.
@@ -233,7 +233,7 @@ Hot leads: ${leads.filter(l => l.isHot).length}`;
       { type: "divider" },
       {
         type: "context",
-        elements: [{ type: "mrkdwn", text: `_QuantHub Sales Agent · ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}_` }]
+        elements: [{ type: "mrkdwn", text: `_Dark Yeti Sales Agent · ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}_` }]
       }
     ];
 

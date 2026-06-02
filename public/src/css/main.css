@@ -2,11 +2,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* QuantHub Brand — matches quanthub.com exactly */
-  --brand:        #0077B5;
+  /* Dark Yeti Brand — matches quanthub.com exactly */
+  --brand:        #2563EB;
   --brand-dim:    #E0F0FA;
-  --brand-sec:    #0B4971;
-  --brand-border: rgba(0,119,181,.25);
+  --brand-sec:    #1E40AF;
+  --brand-border: rgba(37,99,235,.25);
   --accent:       #22C55E;
   --accent-dim:   #f0fdf4;
   --accent-border:#86efac;
@@ -31,7 +31,7 @@
   --red:          #B91C1C;
   --red-dim:      #FEE2E2;
   --red-border:   #FCA5A5;
-  --blue:         #0077B5;
+  --blue:         #2563EB;
   --blue-dim:     #E0F0FA;
   --blue-border:  #7ABDE0;
   --coral:        #C2410C;
@@ -45,7 +45,7 @@
   --radius-md: 10px;
   --radius-lg: 14px;
   --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
-  --shadow-md: 0 4px 10px rgba(0,119,181,.12);
+  --shadow-md: 0 4px 10px rgba(37,99,235,.12);
 }
 
 html, body {
@@ -75,9 +75,9 @@ html, body {
   justify-content: space-between;
   padding: 0 28px;
   height: 76px;
-  border-bottom: 3px solid #0077B5;
+  border-bottom: 3px solid #2563EB;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0,119,181,.10);
+  box-shadow: 0 2px 8px rgba(37,99,235,.10);
   position: sticky;
   top: 38px;
   z-index: 100;
@@ -91,7 +91,7 @@ html, body {
 .header-logo { height: 52px; width: auto; display: block; }
 .header-sep  { width: 1px; height: 36px; background: #DDE4EF; }
 
-.header-title { font-size: 15px; font-weight: 700; color: #0077B5; letter-spacing: -.01em; }
+.header-title { font-size: 15px; font-weight: 700; color: #2563EB; letter-spacing: -.01em; }
 .header-sub   { font-size: 11px; color: #4A5568; }
 
 .badge {
@@ -100,7 +100,7 @@ html, body {
 }
 .badge-live { background: #dcfce7; color: #16a34a; border: 1px solid #86efac; }
 .badge-live.connecting { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
-.badge-ai   { background: #E0F0FA; color: #0077B5; border: 1px solid #7ABDE0; }
+.badge-ai   { background: #E0F0FA; color: #2563EB; border: 1px solid #7ABDE0; }
 
 .rep-selector select {
   background: #F4F6F9; color: #3A3C3E;
@@ -109,7 +109,7 @@ html, body {
 }
 .btn-refresh {
   background: #F4F6F9; border: 1px solid #DDE4EF;
-  color: #0077B5; border-radius: var(--radius-sm);
+  color: #2563EB; border-radius: var(--radius-sm);
   padding: 4px 10px; cursor: pointer; font-size: 14px; transition: all .15s;
 }
 .btn-refresh:hover { background: #E0F0FA; }
@@ -180,13 +180,13 @@ html, body {
 
 /* ── Per-section color accents ────────────────────────────────────── */
 .panel-priorities {
-  border-top: 3px solid #0077B5;
+  border-top: 3px solid #2563EB;
 }
 .panel-priorities .panel-header {
   background: #EBF5FC;
   border-bottom: 1px solid #C7DFF0;
 }
-.panel-priorities .panel-title { color: #0077B5; }
+.panel-priorities .panel-title { color: #2563EB; }
 
 .panel-activity {
   border-top: 3px solid #22C55E;
@@ -238,7 +238,7 @@ html, body {
 }
 .fc-runway-proj {
   height: 100%;
-  background: linear-gradient(90deg, rgba(0,119,181,.3), rgba(14,165,233,.2));
+  background: linear-gradient(90deg, rgba(37,99,235,.3), rgba(14,165,233,.2));
   transition: width .8s ease .1s;
 }
 .fc-runway-labels {
@@ -663,7 +663,7 @@ a.cl-link:hover {
 }
 
 /* ── Shared nav bar ───────────────────────────────────────────────── */
-.qh-nav{height:38px;background:linear-gradient(90deg,#0B3D5E,#0B4971);display:flex;align-items:center;padding:0 20px;gap:0;border-bottom:2px solid rgba(0,119,181,.4);box-shadow:0 2px 10px rgba(0,0,0,.15);position:sticky;top:0;z-index:3000;}
+.qh-nav{height:38px;background:linear-gradient(90deg,#0B3D5E,#1E40AF);display:flex;align-items:center;padding:0 20px;gap:0;border-bottom:2px solid rgba(37,99,235,.4);box-shadow:0 2px 10px rgba(0,0,0,.15);position:sticky;top:0;z-index:3000;}
 .qh-nav-mark{font-size:13px;font-weight:800;color:#fff;letter-spacing:.06em;font-family:'Manrope',sans-serif;}
 .qh-nav-sep{width:1px;height:18px;background:rgba(255,255,255,.2);margin:0 14px;flex-shrink:0;}
 .qh-nav-links{display:flex;gap:2px;flex:1;}
@@ -697,7 +697,7 @@ html.dark {
   --blue-border:  #1D4E6A;
 }
 html.dark body { background: var(--bg-base); color: var(--text-primary); }
-html.dark .header { background: #0D2238; border-bottom-color: #0077B5; }
+html.dark .header { background: #0D2238; border-bottom-color: #2563EB; }
 html.dark .kpi-bar { background: var(--border); }
 html.dark .kpi-card { background: var(--bg-panel); }
 html.dark .panel { background: var(--bg-panel); }
@@ -712,7 +712,7 @@ html.dark .insight-box { background: #091929; border-color: #1C3347; }
 html.dark .ask-agent input { background: #0D1E2E; border-color: #254860; color: var(--text-primary); }
 html.dark .ask-agent input::placeholder { color: var(--text-hint); }
 html.dark .ask-agent button { background: #0D2238; border-color: #254860; color: #38BDF8; }
-html.dark .ask-agent button:hover { background: #0077B5; color: #fff; }
+html.dark .ask-agent button:hover { background: #2563EB; color: #fff; }
 html.dark .agent-response { background: #091929; border-color: #1C3347; color: var(--text-sec); }
 html.dark .priority-item:hover { background: var(--bg-hover); }
 html.dark .cl-item:hover { background: var(--bg-hover); }

@@ -1,4 +1,4 @@
-# QuantHub Sales Agent
+# Dark Yeti Sales Agent
 ### AI-powered daily activity driver for sales reps · HubSpot + Claude + Cloudflare
 
 ---

@@ -57,7 +57,7 @@ window.ActivityTracker = (() => {
 window.DealVelocity = (() => {
 
   // Light-theme colors that read well on white backgrounds
-  const COLORS = ["#0077B5", "#0EA5E9", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6"];
+  const COLORS = ["#2563EB", "#0EA5E9", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6"];
 
   function fmtMoney(n) {
     if (n >= 1_000_000) return `$${(n/1_000_000).toFixed(1)}M`;
