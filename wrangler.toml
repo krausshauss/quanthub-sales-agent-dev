@@ -1,4 +1,4 @@
-name = "quanthub-sales-agent"
+name = "dark-yeti-sales-agent"
 main = "cloudflare-worker.js"
 compatibility_date = "2024-01-01"
 workers_dev = true
@@ -24,7 +24,7 @@ not_found_handling = "404-page"
 # For the dev environment, append `--env dev` to each.
 
 [env.dev]
-name = "quanthub-sales-agent-dev"
+name = "dark-yeti-sales-agent-dev"
 
 [env.dev.assets]
 directory = "./public"

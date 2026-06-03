@@ -70,7 +70,7 @@ export default {
 
       // ── Authed: health ────────────────────────────────────────────
       if (path === "/health") {
-        return json({ ok: true, worker: "quanthub-sales-agent", ts: Date.now() });
+        return json({ ok: true, worker: "dark-yeti-sales-agent", ts: Date.now() });
       }
 
       // ── POST /claude ──────────────────────────────────────────────
